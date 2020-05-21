@@ -172,7 +172,7 @@ For a fixed dataset, this dictionary $\mathcal{D}$ is obtained by uniformly samp
 \end{figure}
 
 Once the dictionary $\mathcal{D}$ is fixed, for each patch $p_{i,x}$ we consider the following set of euclidean pairwise distances:
-\[\mathcal{C}_{i, x} =\{\Vert p_{i, x} - d \Vert\,, d\in\mathcal{D} \}\,.\]
+\begin{align*}\mathcal{C}_{i, x} =\{\Vert p_{i, x} - d \Vert\,, d\in\mathcal{D} \}\,.\end{align*}
  
 For each whitened patch we encode the $K$ nearest neighbors of $p_{i,x}$ from the set $\mathcal{D}$, for some $ K \in \mathbb{N}$, which is a quantization step.
 More formally, we consider $\tau_{i,x}$ the $K$-th largest element of $\mathcal{C}_{i,x}$, and we define the $K$-nearest neighbors binary encoding as follow, for $(d,i)\in\mathcal{D}\times\mathcal{I}$:
@@ -193,7 +193,7 @@ More formally, we consider $\tau_{i,x}$ the $K$-th largest element of $\mathcal{
 
 Observe that this operation produces an output similar to the forward of a 1-hidden layer neural network, except that the non-linearity is not point-wise. In order to reduce the computational burdering of our method, we perform an intermediary average-pooling step.
 Indeed, we subdivide $\mathcal{I}$ in squared overlapping regions $\mathcal{I}_k\subset\mathcal{I}$, leading to the representation $\Phi$ defined, for $d\in\mathcal{D}, k$ by:
-\[\Phi(x)_{d,k}= \sum_{i\in \mathcal{I}_k}\phi(x)_{d,i}\,.\]
+\begin{align*}\Phi(x)_{d,k}= \sum_{i\in \mathcal{I}_k}\phi(x)_{d,i}\,.\end{align*}
 
 The next section describes our classification pipeline, as we feed our representation $\Phi$ to a linear classifier on challenging datasets. Note that given the intermediary quantification, it would not be possible to learn the parameters of our dictionary via a standard differentiable method, consequently this approach fails to be analyzed directly through the scope of \cite{chizat2018global} for instance.
 
@@ -214,7 +214,7 @@ The loss is the usual cross-entropy loss. \Edouard{ For reducing the computation
 
 \subsection{CIFAR-10}
 
-\paragraph{Classification experiments} Since CIFAR-10 is small \edouard{enough}, we can use a "large" number of patches in the dictionary, i.e. up to $|\mathcal{D}|=1.6\,10^5$ patche with $Q = 6$.
+\paragraph{Classification experiments} Since CIFAR-10 is small \Edouard{enough}, we can use a "large" number of patches in the dictionary, i.e. up to $|\mathcal{D}|=1.6\,10^5$ patche with $Q = 6$.
 The average pooling performed to reduce the size of the representation if of size $5$ and stride $3$.
 The random crop are of size $32\times 32$ with reflect padding of size $4$.
 
@@ -287,11 +287,24 @@ Results are shown in figure \ref{fig:ablation_study}. \Edouard{CONCLUSIONS??????
 
 
 \begin{figure}
-  \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
+  \includegraphics[width=1.\linewidth]{figures/spectrum_patches}
   \caption{Spectrum of $\Sigma^{1/2}$ on CIFAR-10 (Left) and ImageNet (Right).\label{dico}}
 \end{figure}
 \subsection{Imagenet}
+
+
+\begin{figure}
+	\includegraphics[width=.95\linewidth]{figures/intrinsic_dims}
+	\caption{Left: Ratio between covariance dimension and extrinsic dimension of the patches as a functions of their size. Right: Ratio between nearest neighbor dimension and extrinsic dimension of the patches as a functions of their size.}
+\end{figure}
+tt
+
+\begin{figure}
+\centeringt
+	\includegraphics[width=1.\linewidth]{figures/topographical_order_more_patches}
+	\caption{Samples from the whitened patches arranged using a topographic ordering.}
+\end{figure}
+
 
 \paragraph{Classification experiment} Since Imagenet is a much larger dataset than CIFAR-10, we limit ourselves to a number of patches up to $2048$.
 The patch size $Q$ is $6$ for Imagenet64 and $12$ for Imagenet128.
@@ -350,9 +363,9 @@ parler du unforgettable je sais pas quoi
 \section{Mahanalobis distance and whitening}
 
 The Mahalanobis distance \citep{chandra1936generalised, mclachlan1999mahalanobis} between two samples $x$ and $x'$ drawn from a random vector $X$ with covariance $\Sigma$ is defined as  
-\[ D_M (x, x' ) =  \sqrt{ (x - x')^T \Sigma^{-1} (x - x')} \]
+\begin{align*} D_M (x, x' ) =  \sqrt{ (x - x')^T \Sigma^{-1} (x - x')} \end{align*}
 If the random vector $X$ has identity covariance, it is simply the usual euclidian distance :
-\[ D_M (x, x' ) =  \| x - x' \| \]
+\begin{align*} D_M (x, x' ) =  \| x - x' \| \end{align*}
 
 Using the diagonalization of the coraviance matrix,  $\Sigma = P\Lambda P^T$, the affine whitening operators of the random vector $\mathbf{X}$ are the operators 
 \begin{equation}
@@ -360,9 +373,9 @@ Using the diagonalization of the coraviance matrix,  $\Sigma = P\Lambda P^T$, th
      w : \mathbf{X} \mapsto O \Lambda^{-1/2} P^T (\mathbf{X} - \mu), \quad \forall O \in  O_n (\mathbb{R})
 \end{equation}
 For all whitening operator $w$ we have :
-\[
+\begin{align*}
 \|w(x) - w(x')\| = D_M(x, x')
-\]
+\end{align*}
 Indeed 
 \begin{align*}
   \|w(x) - w(x')\|
@@ -376,27 +389,27 @@ Indeed
 
 In this section, we explicitely write the whitened patches with the whitening operator $W$.
 Recall that  we consider the following set of euclidean pairwise distances:
-\[\mathcal{C}_{i, x} =\{\Vert W p_{i, x} - W d \Vert\, d\in\mathcal{D} \}\,.\]
+\begin{align*}\mathcal{C}_{i, x} =\{\Vert W p_{i, x} - W d \Vert\, d\in\mathcal{D} \}\,.\end{align*}
 
 For each image patch we encode the $K$ nearest neighbors of $W p_{i,x}$ in the set $Wd, d \in \mathcal{D}$, for some $ K \in 1 \ldots|\mathcal{D}| $.
 
 Using the square distance instead of the distance doesn't change the $K$ nearest neighbors.
 We have 
-\[ \Vert Wp_{i,x} - Wd \Vert^2 = \Vert Wp_{i,x} \Vert^2 - 2 \langle p_{i,x}, W^T W d \rangle + \Vert Wd\|^2 \]
+\begin{align*} \Vert Wp_{i,x} - Wd \Vert^2 = \Vert Wp_{i,x} \Vert^2 - 2 \langle p_{i,x}, W^T W d \rangle + \Vert Wd\|^2 \end{align*}
 The term $\|Wp_{i,x}\|^2$ doesn't affect the $K$ nearest neighbors, so the $K$ nearest neighbors are the $K$ smallest values in
-\[
+\begin{align*}
         \|Wd \|^2 - 2\langle p_{i,x}, W^T W d \rangle
-\]
+\end{align*}
 or equivalently the  $K$ largest values in
-\[
-        \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} \.
-\]
+\begin{align*}
+        \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} .
+\end{align*}
 This can be implemented in a convolution of the image using $W^T W d$ as filters and ${\|Wd \|^2 \over 2}$ as bias term, followed by a vectorwise non-linearity that binary encodes the $K$ largest values in the channel dimension.
 
 To compute the $K$ nearest neighbors in $\mathcal{D}$ we have to compute the quantity
-\[ \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} \]
+\begin{align*} \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} \end{align*}
 We can then easily compute 
-\[ - \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} \] which is the quantity needed to compute the $K$ nearest neighbors in the set of negative patches $\overline{\mathcal{D}}$.
+\begin{align*} - \langle p_{i,x}, W^T W d \rangle - {\|Wd \|^2 \over 2} \end{align*} which is the quantity needed to compute the $K$ nearest neighbors in the set of negative patches $\overline{\mathcal{D}}$.
 This is a cheap way of doubling the number of patches.
 
 
