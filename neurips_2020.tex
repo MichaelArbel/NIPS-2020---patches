@@ -30,6 +30,8 @@
 \usepackage{microtype}      % microtypography
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{arydshln}
+
 \newcommand{\Edouard}[1]{\textcolor{blue}{#1}}
 \newcommand{\mynotes}[1]{\textcolor{red}{#1}}
 \title{On the Role of Patches in \Edouard{ Analysis of}  Image Classification \Edouard{models}}
@@ -92,7 +94,7 @@ This is challenging because images are high-dimensional signals and deep neural 
 
 
 % This paragraph must discuss a/ the fact that a lot of theoretical(eg arora)/empirical(eg bagnet) works are implicitely or explicitely patch based b/ They don't do the necessary ablations to see that and the low dimensional structure of patches is quite more reasonable idea
-Our work is primarly motivated by the emergent principle that  deep learning success  could be explained by the choice of  well-designed kernels \citep{mairal2016end,li2019enhanced,shankar2020neural,lu2014scale}, which have favorable theoretical properties~\citep{jacot2018neural,rahimi2008random}. One of our main statement is that each of those vision works rely on patch extraction and this latter is implicitely the key of their success.  Indeed, without ablation experiments, it is difficult to know which of  the correct modeling of the problem or  the ad-hoc engeneering choices is important. We argue that those works can be in fact understood through the common  lence of representations constituted by a single patch dictionary : we decompose and analyze each step of our feature design, on gold-standard  datasets. We further note that this idea is aligned with empirical studies that relate the models decisions with visual interpretations at small and large patch level
+Our work is primarly motivated by the emergent principle that  deep learning success  could be reproduced by   designing appropriate kernels \citep{mairal2016end,li2019enhanced,shankar2020neural,lu2014scale}, which have favorable theoretical properties~\citep{jacot2018neural,rahimi2008random}. We aim to show that  the those vision works rely on patch extraction and this latter is implicitely the key of their success.  Indeed, without ablation experiments, it is difficult to know which of  the correct modeling of the problem or  the ad-hoc engeneering choices is important. We argue that those works can be in fact understood through the common  lense of representations constituted by a single dictionary of patches: we decompose and analyze each step of our feature design, on gold-standard  datasets. We further note that this idea is aligned with empirical studies that relate the models decisions with visual interpretations at small and large patch level
 \citep{zeiler2014visualizing,brendel2019approximating}, which suggests that the intrinsic dimension of patches is quite  lower than the original signal's dimension and they are easier to interpret.
 
 
@@ -100,7 +102,7 @@ Our work is primarly motivated by the emergent principle that  deep learning suc
 We remind well-known properties of patches. By construction,  they are locally stationnary processus obtained from images, and it can be empirically verified that they are sparsified in a wavelet basis~\citep{mallat1999wavelet}. Furthermore, they are often the very first component of many classic vision pipelines \citep{perronnin2010improving,lowe2004distinctive,brendel2019approximating,oyallon2018scattering}. While one has a good understanding of the behavior of a dictionary of patches for image compression
 ~\citep{wallace1992jpeg}, texture synthesis~\citep{efros1999texture} or image inpainting ~\citep{criminisi2004region} , we have a limited knowledge and understanding of it in the context of image classification. We address this is issue by studying this experimentally.
 
-One of our major contribution is to introduce a   representation that does not involve learning (up to a linear classifier) and to our knowledge, it outperforms by a large margin the classification accuracy of former attempts \Edouard{to get rid of representation learning} on the large-scale ImageNet dataset. Our representation is based on a dictionary of whitened patches: pair-wise distances between this dictionary and the patches of each images are computed, quantized and then fed to a linear classifier. This method is  straightforward and involves a limited ad-hoc feature engineering. \Edouard{Note that other papers which work at the patch level can be understood as linear embeddings that rely on the Euclidean distances between patches: our good performances suggest that a Hamming distance between set of patches of different images is as well adapted, which is a surprising result.} As discussed in Section \ref{related_work}, we believe that we are the first line of work to explicitly show that this  spare feature is solely achieving non-trivial performances on difficult datasets.
+One of our major contribution is to introduce a representation that does not involve learning (up to a linear classifier) and to our knowledge, it outperforms by a large margin the classification accuracy of former attempts to get rid of representation learning on the large-scale ImageNet dataset. Our representation is based on a dictionary of whitened patches: pair-wise distances between this dictionary and the patches of each images are computed, quantized and then fed to a linear classifier. This method is  straightforward and involves a limited ad-hoc feature engineering. \Edouard{Note that other papers which work at the patch level can be understood as linear embeddings that rely on some Euclidean distances between patches: our results indicate that a Hamming distance between well-chosen set of patches is a surprisingly good baseline.} As discussed in Section \ref{related_work}, we believe that we are the first line of work to explicitly show that this  spare feature is solely achieving non-trivial performances on difficult datasets.
 
 % Structure of the paper
 Our paper is structured as follow: first, we discuss the related works (Sec.~\ref{related_work}). Then, Sec.~\ref{method} explain precisely how our visual representation is built. In Sec.~\ref{experiments}, we present experimental results on the vision datasets CIFAR-10 and the large scale  ImageNet as well as a collection of numerical experiments to disentangle the different components of our model. At the time of publication, we will release our code online as well as the commands to reproduce exactly our results.
@@ -124,22 +126,23 @@ In this paper, we solve those issues.
 {We  note the links between methods based on whitened dictionary of patches and Independant Component Analysis methods such that \citep{ngiam2010tiled}, as a whitening procedure decorrelates the components of a dictionary of patches. Our work can also be interprated as a special case of approaches such that Locality-constrained Linear Coding \citep{russakovsky2015imagenet,yu2010improved}, Local Linear Embedding \citep{Roweis2323} or Sparse coding \citep{bo2013multipath}. The main idea is to assume that the  decision boundary of a supervised task can be approximated by few data points or descriptors: here, we show that this assumption holds at the patch level. It suggest that distances between patches already encode a huge amount of information, which is implied for instance by the fame low-dimensional manifold hypothesis 
 \citep{fefferman2016testing}. 
 
-We remind that a SIFT extraction \cite{lowe2004distinctive} followed by a Fisher Vectors  encoding \citep{sanchez2013image} and a linear SVM was the state of the art on ImageNet (\Edouard{XX} top-5 accuracy), before the supremacy (\Edouard{XX} top-5) of deep neural networks \citet{krizhevsky2012imagenet}. This classification pipeline is believed to help to tackle the curse of dimensionality by reducing the image dimensionality: our work  suggests that even the patches of large raw images are quite low-dimensional. This is a surprising fact: while this is natural for very small and aliased  images like CIFAR-10, our work shows that it also surprisingly holds for larger images which have a lot of high-frequency components and huge variabilities.
+We remind that a SIFT extraction \cite{lowe2004distinctive} followed by a Fisher Vectors  encoding \citep{sanchez2013image} and a linear SVM was the state of the art on ImageNet ($\sim 75\% $ top-5 accuracy), before the supremacy ($\sim 80$\% top-5) of deep neural networks \citet{krizhevsky2012imagenet}. This classification pipeline is believed to help to tackle the curse of dimensionality by reducing the image dimensionality: our work  suggests that even the patches of large raw images are quite low-dimensional. This is a surprising fact: while this is natural for very small and aliased  images like CIFAR-10, our work shows that it also surprisingly holds for larger images which have a lot of high-frequency components and huge variabilities.
 
+% Discuter ici les accuracy de merde
 Spare methods involving solely a single-layer of  features  have been tested on the Imagenet 2010 dataset\footnote{ As one can see on the Imagenet2010 leaderboard http://image-net.org/challenges/LSVRC/2010/results, and the accuracies on ImageNet2010 and ImageNet2012 are comparable.}, using for example SIFT, color histogram and Gabor texture encoding of the image with $K$-nearest, yet there is a substential gap in accuracy that we attempt to fill in this work.
 
 The Scattering Transform \citep{mallat2012group} is also a deep non-linear operator that does not involve representation learning, which has been tested on ImageNet ($\sim 45\%$ top-5 accuracy \citep{zarka2019deep} and  CIFAR-10 ($\sim 80 \%$, \citep{Oyallon_2015_CVPR}) and can be thought as a super-SIFT~\citep{Oyallon_2018_ECCV}.
-Some works also study directly patch encoders that achieve competitive accuracy on ImageNet but involve deep cascade of layers that are difficult to interpret \citep{oyallon2017scaling,zarka2019deep,brendel2019approximating}. In our work, we focus on shallow classifiers.
+Some works also study directly patch encoders that achieve competitive accuracy on ImageNet but involve deep cascade of layers that are difficult to interpret \citep{oyallon2017scaling,zarka2019deep,brendel2019approximating}. In our work, we focus on shallow classifiers.\Edouard{To our knowledge, only \cite{greedy} proposes the accuracy of a 1-hidden layer neural network on ImageNet, which we outperform by a large margin.}
 
 \section{Method}
 \label{method}
 
 \subsection{Whitening}
 
-In this section, we describe the single pre-processing step that we used on our image data, namely a whitening procedure on patches. Section \ref{experiments} shows that this step is crucial. A patch of size $Q^2$ of an image, is a  restriction of this image to a squared domain of surface $Q^2$. Only in this subsection, we assimilate a patch $p$ to a random variable with finite covariance $\Sigma$. We consider whitening operators which are regularized by a $\lambda$-Tykhonov regularization to avoid ill-conditioning effects. Formally, they are defined via $W=(\lambda I+\Sigma
-)^{-1/2}$. In practice, we estimate the related covariance matrix via the empirical covariance matrix  computed over the training set.
+In this section, we describe the single pre-processing step that we used on our image data, namely a whitening procedure on patches. Section \ref{experiments} shows that this step is crucial. A patch of size $Q^2$ of an image, is a  restriction of this image to a squared domain of surface $Q^2$. Only in this subsection, we assimilate a patch $p$ to a random variable with finite covariance $\Sigma$. We consider whitening operators which are regularized by a $\lambda$-Tykhonov regularization to avoid ill-conditioning effects.
 
-In the following and for the sake of simplicity, we only  consider whitened patches, i.e., we implicitely replace everywhere $p$ by $p'=Wp$. Note that the Euclidean distance between whitened patches (ie, the Mahanobolis distance \citep{chandra1936generalised, mclachlan1999mahalanobis} ) is not affected by the choice of $\Sigma^{1/2}$ (different choices leading to PCA, ZCA, ...). Appendix A discusses further the effect of a whitening operator on the Euclidean norm of its realizations.
+Formally, they are defined up to an isometry via $W=(\lambda \mathbf{I}+\Sigma
+)^{-1/2}$.  Note that the Euclidean distance between whitened patches (ie, the Mahanobolis distance \citep{chandra1936generalised, mclachlan1999mahalanobis} ) is not affected by the choice of the isometry (different choices leading to PCA, ZCA, ...), which is discussed in Appendix A. In practice, we estimate the related covariance matrix via the empirical covariance matrix  computed over the training set. In the following and for the sake of simplicity, we will only  consider whitened patches, i.e., we will implicitely replace everywhere $p$ by $p'=Wp$.
  
  
 We now introduce our main notation. For a given image $x$ of size $N^2$ and a patch size $Q^2$, we further introduce its collection of whitened overlapping patches $\mathcal{P}_x=\{p_{x,i},i\in\mathcal{I}\}$ where $\mathcal{I}$ is a spatial index such that $|\mathcal{I}|=(N-Q+1)
@@ -153,21 +156,21 @@ For a fixed dataset, this dictionary $\mathcal{D}$ is obtained by uniformly samp
 
 \begin{figure}
   \centering
-  \fbox{\rule[-.5cm]{0cm}{4cm} \rule[-.5cm]{4cm}{0cm}}
-  \caption{An example of dictionary $\mathcal{D}$ on CIFAR-10 (Left) and ImageNet (Right).\label{dico}}
+  	\includegraphics[width=0.5\linewidth]{figures/topographical_order_more_patches}
+  \caption{An example of whitened dictionary  $\mathcal{D}$ from ImageNet-128 (Left), ImageNet-64 (Top-Right), CIFAR-10 (Bottom-Right). The atoms have been reordered via a topographic algorithm.\label{dico}}
 \end{figure}
 
 Once the dictionary $\mathcal{D}$ is fixed, for each patch $p_{i,x}$ we consider the following set of euclidean pairwise distances:
 \begin{align*}\mathcal{C}_{i, x} =\{\Vert p_{i, x} - d \Vert\,, d\in\mathcal{D} \}\,.\end{align*}
  
 For each whitened patch we encode the $K$ nearest neighbors of $p_{i,x}$ from the set $\mathcal{D}$, for some $ K \in \mathbb{N}$, which is a Vector Quantization (VQ) step.
-More formally, we consider $\tau_{i,x}$ the $K$-th largest element of $\mathcal{C}_{i,x}$, and we define the $K$-nearest neighbors binary encoding as follow, for $(d,i)\in\mathcal{D}\times\mathcal{I}$:
+More formally, we consider $\tau_{i,x}$ the $K$-th smallest  element of $\mathcal{C}_{i,x}$, and we define the $K$-nearest neighbors binary encoding as follow, for $(d,i)\in\mathcal{D}\times\mathcal{I}$:
 
 
 \begin{equation}
 \phi(x)_{d,i}=
 \begin{cases}
-1,&\text{if } \Vert  p_{i,x} - d\Vert \geq \tau_{i,x}\\
+1,&\text{if } \Vert  p_{i,x} - d\Vert \leq \tau_{i,x}\\
 0,&\text{otherwise}.
 \end{cases}
 \end{equation}
@@ -188,55 +191,63 @@ The next section describes our classification pipeline, as we feed our represent
 
 \section{Experiments}
 \label{experiments}
-We train  \Edouard{shallow} classifiers (e.g., Linear and 1-hidden layer CNNs) on top of our reprensentation $\Phi$ on two widely used image classification datasets,  CIFAR-10 and ImageNet\Edouard{, which consist respectively of $5\times10^5$ small and $1.2\times10^6$ large color images  divided respectively in 10 and $10^3$ classes.}
+We train  shallow classifiers (e.g., Linear and 1-hidden layer CNNs) on top of our reprensentation $\Phi$ on two widely used image classification datasets,  CIFAR-10 and ImageNet, which consist respectively of $5\times10^5$ small and $1.2\times10^6$ large color images  divided respectively in 10 and $10^3$ classes.
 
 
-\Edouard{In each experiments, we apply a 2D batch normalization to the output \Edouard{in order to standardize our features on the fly}. The spatial subdivision $\mathcal{I}_k$ are adapted to correspond to an average pooling with kernel size $k$ and stride $s$. }As  $\Phi$ can be \Edouard{a very high dimensional vector}, we factorize our linear classifier into a linear convolutional layers followed by a fully connected layer}, which is motivated by similar consideration as the introduction of a "bottleneck" \cite{ResNet}. We apply a first convolutional layer that cionsists in $1\times 1$ convolution that reduces the number of channels from $\mathcal{D}$ to $C_1$. Then, we feed this output to a second convolutional layer.
-This reduces both the number of computations and the number of parameters, and this approach is well motivated by the natural translation invariance of images.
+In each experiments, we employ 2D batch normalization in order to standardize our features on the fly. The spatial subdivision $\mathcal{I}_k$ are implemented as an average pooling with kernel size $n_1$ and stride $s$. 
+As  $\Phi$ is high-dimensional, we factorize our linear classifier into a convolutional layer, a global average pooling and a final fully connected layer. This is motivated by similar considerations as the introduction of a "bottleneck" \cite{ResNet}. We apply a first convolutional layer that consists in $n_2$ convolution with stride 1 that reduces the number of channels from $\mathcal{D}$ to $c$. This reduces both the number of computations and the number of parameters, and this approach is well motivated by the natural translation invariance of images.
 
-In all our experiments, we trained our linear classifier via SGD with momentum of 0.9 and a fixed schedule for the learning rate.
-The loss is the usual cross-entropy loss. \Edouard{ For reducing the computational overhead of our method on ImageNet, we employ lower-resolution images: we use 64 and 128 squred images, instead of the standard 224 length.  \cite{DBLP:journals/corr/ChrabaszczLH17} observed that this does not alterate the top-performances of standard models, and we also believe it introduces a useful dimensionality reduction, as it removes high-frequency part of images that are unstable \citet{chjdq}.} 
+In all our experiments, we trained our linear classifier via SGD with momentum of 0.9, no weight decay and a fixed schedule for the learning rate, with the standard cross-entropy loss. We employed a standard data augmentation, however, we reduced the image resolution for ImageNet, which we discuss below.
+
 
 
 \subsection{CIFAR-10}
 
-\paragraph{Classification experiments} Since CIFAR-10 is small \Edouard{enough}, we can use a "large" number of patches in the dictionary, i.e. up to $|\mathcal{D}|=1.6\,10^5$ patche with $Q = 6$.
-The average pooling performed to reduce the size of the representation if of size $5$ and stride $3$.
-The random crop are of size $32\times 32$ with reflect padding of size $4$.
+ \paragraph{Implementation details}Since CIFAR-10 is small enough, we can use a "large" number of patches in the dictionary, i.e. up to $|\mathcal{D}|=1.6\times10^5$ patches with $Q = 6$.
+The average pooling performed to reduce the size of the representation if of size $5$ and stride $3$. \Edouard{For the linear experiments, the linear layer hyperparameters are such that: $n_1=5, n_2=6,s=3,c=128$. For the 1-hidden layer experiment, we use: XXX}.
+Our data augmentation consists in random crops of size $32^2$ after  padding of our images with $4$ pixels.
 
 The $1 \times 1$ convolutional operator $C_1$ outputs $128$ channels.
 The convolutional operator has a spatial size $6 \times 6$.
-For the experiments with 2048 patches, we run the optimization during 80 epochs with an initial learning rate of $0.003$ decayed by a factor 10 at epochs 50 and 75.
+For the experiments with respectively $|\mathcal{D}|=2\times 10^3$ and $|\mathcal{D}|=1.6\times 10^5$ patches, we used respectively an initial learning of 0.003 and 0.001 that we decayed by 10 at respectively epochs 50,75 and 100, 150. This is consistent with standard renormalization when increasing the number of parameters \cite{trouver une citation, on dirait un sqrt(10) facteur qui indique la loss a pas été renormalisé, à vérifier}.
 
 
-\Edouard{DISCUTER SOTA DES TABLEAUX ; EN PARTICULIER ARORA}
+\paragraph{Classification experiments} Despite the relative simplicity of the encoding, our method performs comparably to other shallow methods with a linear classifier.
+Compare to \cite{recht2019imagenet},  we use a much smaller number of patches ($16.000$ vs. $256.000$) for the same accuracy, and compare to \cite{mairal2016end}, we use an encoding of depth 1 without subspace learning (see \cite{mairal2016end} for details).
+Using a 1 hidden layer classifier, the accuracy increases to $88.0 \%$ approaching the accuracy obtained with deep kernel methods \citep{li2019enhanced,shankar2020neural} and deep convoluitonal networks \citep{krizhevsky2012imagenet}.
+
+
 
 \begin{table}[h]
   \caption{Accuracies on CIFAR-10}
   \label{accuracy}
   \centering
-  \begin{tabular}{|c|c|c|c|c|c|c|}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|}
     \hline 
-    Method&$|\mathcal{D}|$&VQ&$Q$&Depth &Classifier& Accuracy Top-1 \\
+    Reference&Name&$|\mathcal{D}|$&VQ&$Q$&Depth &Classifier& Acc. \\
     \hline 
     \hline 
-    Ours&$10^3$ & Yes&6&1&Linear&82.3 \\
+    Ours&Patch&$10^3$ & Yes&6&1&linear&82.5 \\
+    \hdashline[0.5pt/1pt]
+    Ours&Patch&$10^4$ & Yes&6&1&linear&85.6\\
+    \hdashline[0.5pt/1pt]
+    \cite{coates2011analysis}&Dict.&$10^3$& Yes&6 & 1&linear & 68.6\\
+    \hline 
+    \cite{recht2019imagenet}&Dict.&$10^5$ & No& 6&1&linear &85.6\\
+    \hdashline[0.5pt/1pt]
+    \cite{mairal2016end}&CKN&$10^3, 10^4$& No&3 & 2& linear &85.8\\
     \hline
-    Ours&$10^3$ & Yes& 6&2&1-NN&87.9\\
-    \hline 
-    Ours&$10^4$ & Yes&6&1&Linear&85.6\\
-    \hline 
-    \cite{li2019enhanced}&$10^3$& No&6&6&Kernel &88.9\\
-    \hline 
-    \cite{mairal2016end}&$10^3, 10^4$& No&3 & 2& Linear &85.8\\
-    \hline 
-    \cite{recht2019imagenet}&$10^5$ & No& 6&1&Linear &85.6\\
-    \hline 
-    \cite{shankar2020neural}&-& No&3&5&Kernel &89.8\\
-    \hline 
-    \cite{coates2011analysis}&$10^3$& Yes&6 & 1&Linear &68.6\\
-    \hline
-    \cite{krizhevsky2012imagenet}&-& No&-&5&end-to-end&89\\
+        
+    Ours&Patch&$10^3$ & Yes& 6&2&1-NN&88.0\\
+    \hdashline[0.5pt/1pt
+     \cite{Oyallon_2015_CVPR}&Scatt.& - & No& 8 &2 & kernel & 82.3\\
+     
+    \hdashline[0.5pt/1pt]
+    \cite{shankar2020neural}&CKN&-& No&3&5&kernel &89.8\\
+        \hdashline[0.5pt/1pt]
+    \cite{li2019enhanced}&NTK&$10^3$& No&6&6&kernel &88.9\\
+    \hdashline[0.5pt/1pt]
+    \cite{krizhevsky2012imagenet}&AlexNet&-& No&-&5&end-to-end&89\\
     \hline
   \end{tabular}
 \end{table}
@@ -249,10 +260,11 @@ For the experiments with 2048 patches, we run the optimization during 80 epochs 
   \centering
    \includegraphics[width=0.3\linewidth]{figures/albation_study_npatches.png}
   \includegraphics[width=0.3\linewidth]{figures/albation_study_classifier.png}
-  \includegraphics[width=0.3\linewidth]{figures/albation_study_K.png}\\
+  \includegraphics[width=0.3\linewidth]{figures/albation_study_classifier_2.png}
+  \includegraphics[width=0.3\linewidth]{figures/albation_study_K.png}
   \includegraphics[width=0.3\linewidth]{figures/albation_study_Q.png}
-  \includegraphics[width=0.3\linewidth]{figures/albation_study_eps.png}\\
-  \caption{CIFAR-10 ablation study on the number of patches  $|\mathcal{D}|$, the patch size $Q$, the number of neighbors $K$, the whitening regularizer $\epsilon$ and the number of channels of the factorized classifier.}
+  \includegraphics[width=0.3\linewidth]{figures/albation_study_lambda.png}\\
+  \caption{CIFAR-10 ablation experiments on the number of patches  $|\mathcal{D}|$ (Top-left), the patch size $Q$ (Top-middle), the number of neighbors $K$ (Top-right), the whitening regularizer $\lambda$ (Bottom-left), and the number of channels of the factorized classifier(Bottom right).}
 \end{figure}
 
 
@@ -261,79 +273,115 @@ For the experiments with 2048 patches, we run the optimization during 80 epochs 
 \paragraph{Ablation experiments}
 We decided to use CIFAR-10 to perform several ablation experiments because the experiments take substentially less time than on ImageNet. To measure the importance of different parameter choices, we perform an ablation study on the number of patches in the dictionary $|\mathcal{D}|$, the patch size $Q$, the number of neighbors $K$, the whitening regularizer $\epsilon$ and the number of channels $M$ of the factorized classifier.
 
-The starting experiement uses  $|\mathcal{D}|=2048$ patches, a patch size $Q=6$, the number of neighbors $K=0.4\times 2048 = 820$, the whitening regularizer $\epsilon=1e-3$ and factorized classifier has $M=128$ channels. \Edouard{Note that our representation is absolutely not sparse.}
+The starting experiement uses  $|\mathcal{D}|=2048$ patches, a patch size $Q=6$, the number of neighbors $K=0.4\times 2048 = 820$, the whitening regularizer $\epsilon=1e-3$ and factorized classifier has $M=128$ channels.
+Note that our representation is absolutely not sparse.
 
 
-The number of patches $|\mathcal{D}|$ varies in $\lbrace 512, 1024, 2048, 4096 \rbrace$, the patch size $Q=6$ varies in $\lbrace 4, 5, 6, 7, 8 \rbrace$, the number of neighbors $K=$ varies in $\lbrace 10, 50, 100, 500, 800, 1000, 1500 \rbrace$, the whitening regularizer varies in $\lbrace0, 10^{-5}, 10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\rbrace$, and the number of channels $M$ of the classifier varies in $\lbrace 0, 64, 128 ,256 \rbrace$, $0$ meaning that the classifier is not factorized, i.e. it is a standard fully connected linear operator.
-Results are shown in figure \ref{fig:ablation_study}. \Edouard{CONCLUSIONS????????}
+The number of patches $|\mathcal{D}|$ varies in $\lbrace 512, 1024, 2048, 4096 \rbrace$, the patch size $Q=6$ varies in $\lbrace 4, 5, 6, 7, 8 \rbrace$, the number of neighbors $K=$ varies in $\lbrace 10, 50, 100, 500, 800, 1000, 1500 \rbrace$, the whitening regularizer varies in $\lbrace0, 10^{-5}, 10^{-4}, 10^{-3}, 10^{-2}, 10^{-1}\rbrace$, the number of channels $c$ of the classifier varies in $\lbrace 0, 64, 128 ,256 \rbrace$, $0$ meaning that the classifier is not factorized, i.e. it is a standard fully connected linear operator, and the size of the convolution in the classifier varies in $\lbrace 4, 5 , 6, 7, 8\rbrace$
+Results are shown in figure \ref{fig:ablation_study}.
 
-\paragraph{Random filters and whitening} We note that whitening of patches is a systematic pre-processing step followed by the works cited in \cite{}. Removing the whitening step leads to a drop in accuracy of about XX\%. Using standardized Gaussian features leads to a drop in accuracy of about XX\%. This shows that this step is crucial.
+One can see that the accuracy increases whith the number of patches of the dictionary.
+The choice of the classifiier doesn't affect much the perfomance.
+Unsprisingly, a fully connected classifier overfits more than a factorized classifier.
+The accuracy is not very sentitive to the number of neighbors.
+A small number of neighbors leads to large overfitting.
+The optimum seem to be around $10^3$ neighbors, i.e. half of the number of patches in the dictionary.
+The optimal patch size is $6$ but the accuracy for the other values is similar, and larger patches lead to overfitting.
+Suprisingly, the whitening regularization $\lambda$ is not crucial as setting it to $0$ leads a $1\%$ drop in perfomance.
+Large values of $\lambda$ tend to cancel the whitening effect since the term $\lambda I$ dominates $\Sigma$ in the whitening operator $W = (\lambda I+\Sigma)^{-1/2}$.
+The accuracy drops severely for large values of $\lambda$, indicating that whitening is a key aspect of the representation.
 
-\paragraph{Dictionary structure}
+\paragraph{Random filters and whitening} We note that whitening of patches is a systematic pre-processing step followed by the works cited in \cite{}.
+Removing the whitening step leads to a drop in accuracy of about 17\%.
+Using standardized Gaussian features leads to a drop in accuracy of about XX\%. This shows that this step is crucial for performance.
 
 
 \begin{figure}
   \includegraphics[width=1.\linewidth]{figures/spectrum_patches}
-  \caption{Spectrum of $\Sigma^{1/2}$ on CIFAR-10 (Left) and ImageNet (Right).\label{dico}}
+  \caption{Spectrum of $(\lambda \mathbf{I}+\Sigma)^{1/2}$ on CIFAR-10 (Left) and ImageNet-64 (Right).\label{dico}}
 \end{figure}
 \subsection{Imagenet}
 
+\paragraph{Implementation details, ImageNet-64}  Since Imagenet is a much larger dataset than CIFAR-10, we limit ourselves to a number of patches up to $2048$. Here, $Q=6, n_1=, s=3$For reducing the computational overhead of our method on ImageNet, we employ lower-resolution images: we use $64^2$ and $128^2$ downsampled iamges using the "box" interpolation method, instead of the standard 224 length.  \cite{DBLP:journals/corr/ChrabaszczLH17} observed that this does not alterate much the top-performances of standard models ($-5 \%$ accuracy on average), and we also believe it introduces a useful dimensionality reduction, as it removes high-frequency part of images that are unstable \citet{chjdq}.
 
-\begin{figure}
-	\includegraphics[width=.95\linewidth]{figures/intrinsic_dims}
-	\caption{Left: Ratio between covariance dimension and extrinsic dimension of the patches as a functions of their size. Right: Ratio between nearest neighbor dimension and extrinsic dimension of the patches as a functions of their size.}
-\end{figure}
-tt
+\paragraph{Implementation details, ImageNet-128}
 
-\begin{figure}
-\centering
-	\includegraphics[width=1.\linewidth]{figures/topographical_order_more_patches}
-	\caption{Samples from the whitened patches arranged using a topographic ordering.}
-\end{figure}
-
-
-\paragraph{Classification experiment} Since Imagenet is a much larger dataset than CIFAR-10, we limit ourselves to a number of patches up to $2048$.
+\paragraph{Classification experiment}
 The patch size $Q$ is $6$ for Imagenet64 and $12$ for Imagenet128.
-The average pooling performed to reduce the size of the representation if of size $5$ and stride $3$ for Imagenet64 and of size $10$ and stride $6$ for Imagenet.
-The random crop are of size $64^2$ with reflect padding of size $8$ for Imagenet64 and  $128^2$ with reflect padding of size $16$ for Imagenet128.
+The average pooling performed to reduce the size of the representation has  size $5$ and stride $3$ for Imagenet64 and size $10$ and stride $6$ for Imagenet128.
+For training, we add a reflect padding of size $8$ for $64^2$ images and $16$ for $128^2$ images, and select a random crop of size $64^2$ or $128^2$.
+We do not  modify the images for testing.
+Note thas this procedure differs from the standard data-augmentation, which consists in resizing the smallest size of the image to a given size with constant image ratio, and selecting then a random crop for training and a center crop for testing.
 
 The $1 \times 1$ convolutional operator $C_1$ outputs $256$ channels.
 The convolutional operator $C_2$ has a spatial size $12 \times 12$.
 We run the optimization during 60 epochs with an initial learning rate of 0.003 decayed by a factor 10 at epochs 40 and 50.
 
-\Edouard{DISCUTER SOTA DES TABLEAUX ; EN PARTICUIER BAGNET ; DISCUTER LE PASSAGE CIFAR>IMAGENET64>IMAGENET128(tailles patches, dic, etc)}
+Eventhough it uses "low" image resolution ($64^2$), our method performs better than the  Scattering transform, state of the art method in unsupervised visual representation without representation learning (26.1 \% top1).
+It outperforms some of seminal works on self-supervised deep representation learing methods like Look, Listen and Learn \citep{arandjelovic2017look} (32.3 \% top1), but the perfomance is far from recent self-supervised deep representation learing methods such as momentum-constrast (68.6 \% top1, \citep{he2019momentum} ) and contrastive predictive coding (71.5 \% top1, \citep{henaff2019data}).
+
+Bagnets \citep{brendel2019approximating} have shown that a close to state of the art classification accuracy can be obtained with 50 layers convolutional networks that encode small patch information (patches of size $17^2$ or $33^2$ in $224^2$ images).
+The perfomance obtained by our shallow encoding of the image patches neighborhood is a first step towards understanding the performance obtained by sophisticated patch encoding such as the Bagnets.
+ 
+Increasing the size of the resolution and the size of patches from $64$ and $6$ to $128$ and $12$ improves the performance, showing that the nearest neighbors are still meaningfull in the space of patches of size $12$.
+These patches are in a space of dimension $12^2 \times 3 = 432$, but distance to nearest neighbors are know to be meaningless in uniformly distributed spaces of dimension $10 -15$ \citep{beyer1999nearest}.
+This shows a form of low-dimensionalty in the natural image patches.
+
+
+\begin{figure}
+	\includegraphics[width=.95\linewidth]{figures/intrinsic_dims}
+	\caption{(Left) Ratio between covariance dimension and extrinsic dimension of the patches as a functions of their size. (Right) Ratio between nearest neighbor dimension and extrinsic dimension of the patches as a functions of their size.}
+\end{figure}
+\paragraph{Random filters and whitening}
 
 
 \begin{table}[h]
   \caption{Accuracies on ImageNet}
   \label{accuracy}
   \centering
-  \begin{tabular}{|c|c|c|c|c|c|c|}
+  \begin{tabular}{|c|c|c|c|c|c|c|c|c|}
     \hline 
-    Method&Size of dictionary&$Q$&Depth &Resolution&Classifier& Accuracy Top-5\\
+    Reference&Name& $|\mathcal{D}|$ & $Q$ & Depth & Res. & Classifier & Top-1&Top-5 \\
     \hline 
     \hline
-    Ours&$2.0\times 10^3$ & 82.5 \%\\
-    \hline 
-    Ours&$1.6\times10^4$ & 86.2 \%\\
-    \hline 
-    Ours&$6.6\times 10^5$  & \%\\
+    Ours&Patch&2048 & 6 & 1 & 64 & linear & 33.4 &  54.7 \\
+    \hdashline[0.5pt/1pt]
+    Ours [runnning] &Patch&2048 & 12 & 1 & 128 & linear & 31.2  &  52.4 \\
+    \hdashline[0.5pt/1pt]
+    \cite{zarka2019deep}&Scatt. & - & 32 & 2 & 224 & linear & 26.1  & 44.1 \\
+    \hdashline[0.5pt/1pt]
+    \cite{arandjelovic2017look}&Random CNN & - & - & 9 & 224 & linear & 18.9  & N.C.\\
     \hline
-    Scattering\\
-    \hline 
-    Random neural network\\
+    \cite{arandjelovic2017look}&Look, Listen, Learn & - & - & 9 & 224 & linear & 32.3   & N.C.\\
+     \hdashline[0.5pt/1pt]
+    \cite{sanchez2013image} & FV& - & 24 & 3 & full& linear & N.C. & 72.0\\
     \hline
-    FV\\
-    \hline
-    BagNet\\
-    \hline
+     Ours [runnning]&Patch&2048 & 6 & 2 & 64 & 1-NN & 36.4 &  58.0 \\
+     \hdashline[0.5pt/1pt]
+   \cite{brendel2019approximating} & BagNet & - & 33 & 50 & 224 & end-to-end & N.C. & 87.6
+    \\
+    \hdashline[0.5pt/1pt]
+   \cite{}&shallow 1-hidden layer&-&-&1&224&end-to-end&&\\
+    \hdashline[0.5pt/1pt]
+   \cite{}&shallow 2-hidden layer&-&-&2&224&layerwise&&\\
+    \hdashline[0.5pt/1pt]
+    & AlexNet&&&&&&&\\
+   \hline
   \end{tabular}
 \end{table}
 
 
-\paragraph{Dictionary structure} In Fig. \label{spectrum}, we display the spectrum of...
 
 
+
+
+
+
+\paragraph{VQ and soften non-linearity}
+\subsection{Dictionary structure}
+\paragraph{Comparison between the patches of CIFAR and ImageNet} In Fig. \label{spectrum}, we display the spectrum of...
+\paragraph{Spectrum of $\mathcal{D}$}
+\paragraph{Intrinsic dimension of $\mathcal{D}$}
 \section{Conclusion}
 parler du unforgettable je sais pas quoi
 
