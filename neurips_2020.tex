@@ -296,7 +296,7 @@ Using standardized Gaussian features leads to a drop in accuracy of about XX\%. 
 
 \begin{figure}
   \includegraphics[width=1.\linewidth]{figures/spectrum_patches}
-  \caption{Spectrum of $(\lambda \mathbf{I}+\Sigma)^{1/2}$ on CIFAR-10 (Left) and ImageNet-64 (Right).\label{dico} The color gives the parameter $Q$.}
+  \caption{Spectrum of $\Sigma^{1/2}$ on CIFAR-10 (Left) and ImageNet-64 (Right).\label{spectrum} Colors encode the size of the patches $Q$: from dark brown for small patches to light brown to larger patches.}
 \end{figure}
 \subsection{Imagenet}
 
@@ -326,7 +326,7 @@ These patches are in a space of dimension $12^2 \times 3 = 432$, but distance to
 This shows a form of low-dimensionalty in the natural image patches.
 
 
-\begin{figure}
+\begin{figure}\label{fig:intrinsic_dim}
 	\includegraphics[width=.95\linewidth]{figures/intrinsic_dims}
 	\caption{(Left) Ratio between covariance dimension and extrinsic dimension of the patches as a functions of their size. (Right) Ratio between nearest neighbor dimension and extrinsic dimension of the patches as a functions of their size.}
 \end{figure}
@@ -376,9 +376,23 @@ This shows a form of low-dimensionalty in the natural image patches.
 
 \paragraph{VQ and soften non-linearity}
 \subsection{Dictionary structure}
-\paragraph{Comparison between the patches of CIFAR and ImageNet} In Fig. \label{spectrum}, we display the spectrum of...
 \paragraph{Spectrum of $\mathcal{D}$}
+Fig. \ref{spectrum} shows the spectrum of patches for different sizes $Q$. Those are obtained by extracting all patches of size $Q$ from the training set to estimate the  covariance matrix $\Sigma$ then the spectrum is computed by simple SVD. To allow a comparaison between different dictionaries of patches, we normalize the spectrum of each dictionary by its highest singular value. First, the spectrum tends to decay at an exponential rate (linear rate in semi-logarithmic scale). This rate decreases as the size of the patch increases (from dark brown to light brown) suggesting an increased complexity for larger patches. The second observation is that patches from ImageNet dataset tend to be better conditioned than those from Cifar10 with a conditioning ratio of $10^2$ for ImageNet vs $10^3$ for Cifar10.
+
 \paragraph{Intrinsic dimension of $\mathcal{D}$}
+The fast decay of the spectrum in Fig. \ref{spectrum} suggests that the dictionary of patches have a small intrinsic dimension. To validate this hypothesis, we propose to estimate the intrinsic dimension $d_{int}$ of those patches using two different methods : the covariance dimension and the nearest neighbor dimension. 
+The covariance dimension  $ d_{cov}$ is simply obtained by finding the smallest number of singular values that explain $95\%$ of the total variance. In other words, $d_{cov}$ is the smallest integer such that:
+\begin{align}
+	 \sum_{i=1}^{d_{cov}} \lambda_i \geq (1-r) \sum_{i=1}^{d_{ext}} \lambda_i
+\end{align}
+where $r$ is set to $5\%$ and  $d_{ext}$ represents the extrinsic dimension of the patches which is simply equal to $d_{ext} = 3 Q^2$. Fig. \ref{fig:intrinsic_dim} (Left) shows $d_{cov}$ as a the size of the patches increases for both Cifar10 and ImageNet (downsampled to 32x32 resolution for comparaison). Before the whitening operation, it is clear that the covariance dimension $d_{cov}$ is smaller than the total dimension $d_{ext}$ but more importantly, as the size of the patch $Q$  increases, $d_{cov}$ grows at a much slower rate than the quadratic gowth of $d_{ext}$. On the other hand, after the whitening operation, the covariance dimension recovers the a quadratic growth as well.
+
+It is well know that when the data lives on a curved lower dimensional embedded manifold, the covariance dimension tends to overestimate the intrinsic dimension of that manifold. Hence, it may appear that the data have a large covariance dimension while still living in a much lower dimensional manifold. For that reason, we also propose to estimate $d_{int}$ using a nearest neighbor approach as in \textcolor{red}{cite this}. More precisely, we first estimate a local intrinsic dimension near a particular patch $p$ using the following expression:
+\begin{align}
+	d_{int}(p) = \left( \frac{1}{k-1} \sum_{i=1}^{k-1}\log \frac{\mathcal{D}_k(p)}{\mathcal{D}_i(p)} \right)^{-1} 
+\end{align}
+where $\mathcal{D}_k(p)$ is the euclidean distance between the patch $p$ and it's $k$-th nearest neighbor in the training set. 
+An overall estimate of the $d_{int}$ is then obtained by averaging the local estimate $d_{int}(p)$ over all patches. Such estimate depends on the maximum number of neighbors $k$. However, it converges to the same value when both $k$ and the size of the dataset $\Vert \mathcal{D}\Vert$ increases, provided that $k$ remains small compared to  $\Vert \mathcal{D}\Vert$. Fig. \ref{fig:intrinsic_dim} (right) shows the intrinsic dimension estimated using $k=2000$. It is clear that the estimated dimension $d_{int}$ is much smaller than the total dimension $d_{ext}$ in all cases. Moreover, it grows even more slowly than the covariance dimension when the patch size $Q$ increases. Finally, even after whitening, $d_{int}$ is only about $30\%$ of the total dimension.   
 \section{Conclusion}
 parler du unforgettable je sais pas quoi
 
