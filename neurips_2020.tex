@@ -237,14 +237,12 @@ Using a 1 hidden layer classifier, the accuracy increases to $88.0 \%$ approachi
     \hdashline[0.5pt/1pt]
     \cite{mairal2016end}&CKN&$10^3, 10^4$& No&3 & 2& linear &85.8\\
     \hline
-        
     Ours&Patch&$10^3$ & Yes& 6&2&1-NN&88.0\\
-    \hdashline[0.5pt/1pt
+    \hdashline[0.5pt/1pt]
      \cite{Oyallon_2015_CVPR}&Scatt.& - & No& 8 &2 & kernel & 82.3\\
-     
     \hdashline[0.5pt/1pt]
     \cite{shankar2020neural}&CKN&-& No&3&5&kernel &89.8\\
-        \hdashline[0.5pt/1pt]
+    \hdashline[0.5pt/1pt]
     \cite{li2019enhanced}&NTK&$10^3$& No&6&6&kernel &88.9\\
     \hdashline[0.5pt/1pt]
     \cite{krizhevsky2012imagenet}&AlexNet&-& No&-&5&end-to-end&89\\
@@ -298,7 +296,7 @@ Using standardized Gaussian features leads to a drop in accuracy of about XX\%. 
 
 \begin{figure}
   \includegraphics[width=1.\linewidth]{figures/spectrum_patches}
-  \caption{Spectrum of $(\lambda \mathbf{I}+\Sigma)^{1/2}$ on CIFAR-10 (Left) and ImageNet-64 (Right).\label{dico}}
+  \caption{Spectrum of $(\lambda \mathbf{I}+\Sigma)^{1/2}$ on CIFAR-10 (Left) and ImageNet-64 (Right).\label{dico} The color gives the parameter $Q$.}
 \end{figure}
 \subsection{Imagenet}
 
@@ -333,7 +331,6 @@ This shows a form of low-dimensionalty in the natural image patches.
 	\caption{(Left) Ratio between covariance dimension and extrinsic dimension of the patches as a functions of their size. (Right) Ratio between nearest neighbor dimension and extrinsic dimension of the patches as a functions of their size.}
 \end{figure}
 \paragraph{Random filters and whitening}
-
 
 \begin{table}[h]
   \caption{Accuracies on ImageNet}
