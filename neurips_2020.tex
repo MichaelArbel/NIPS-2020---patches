@@ -31,7 +31,7 @@
 \usepackage{amsmath}
 \usepackage{graphicx}
 \usepackage{arydshln}
-
+\usepackage[lofdepth,lotdepth]{subfig}
 \newcommand{\Edouard}[1]{\textcolor{blue}{#1}}
 \newcommand{\mynotes}[1]{\textcolor{red}{#1}}
 \title{On the Role of Patches in \Edouard{ Analysis of}  Image Classification \Edouard{models}}
@@ -155,11 +155,23 @@ Once this whitening step is performed, the Euclidean distance over patches is ap
 The core idea of our algorithm is to compare the distances between each patches of an image and a fixed dictionary of patches $\mathcal{D}$, with size $|\mathcal{D}|$.
 For a fixed dataset, this dictionary $\mathcal{D}$ is obtained by uniformly sampling patches from images over the whole training set. We augment $\mathcal{D}$ into $\cup_{d\in \mathcal{D}}\{d,-d\}$ because it allows the patches to be contrast invariant and we observed it leads to better classification accuracies; we still refer to it as $\mathcal{D}$. An illustration is given by Fig.~\ref{dico}.
 
-\begin{figure}
-  \centering
-  	\includegraphics[width=0.5\linewidth]{figures/topographical_order_more_patches}
-  \caption{An example of whitened dictionary  $\mathcal{D}$ from ImageNet-128 (Left), ImageNet-64 (Top-Right), CIFAR-10 (Bottom-Right). The atoms have been reordered via a topographic algorithm.\label{dico}}
+
+\begin{figure}[h]
+\centering
+\subfloat[Subfigure 1 list of figures text][ImageNet (128x128)]{
+  	\includegraphics[width=.6\linewidth]{figures/topographical_order_more_patches_imagenet128_patches_12}
+\label{fig:subfig1}}
+\qquad
+\subfloat[Subfigure 2 list of figures text][ImageNet (64x64)]{
+  	  	\includegraphics[width=0.3\linewidth]{figures/topographical_order_more_patches_imagnet64_patches_6_30Images}
+\label{fig:subfig2}}
+\subfloat[Subfigure 3 list of figures text][Cifar10]{
+  	  	\includegraphics[width=0.3\linewidth]{figures/topographical_order_more_patches_cifar10_patches_6_30images}
+\label{fig:subfig3}}
+\caption{An example of whitened dictionary  $\mathcal{D}$ from ImageNet-128 (Left), ImageNet-64 (Top-Right), CIFAR-10 (Bottom-Right). The atoms have been reordered via a topographic algorithm.}
+\label{dico}
 \end{figure}
+
 
 Once the dictionary $\mathcal{D}$ is fixed, for each patch $p_{i,x}$ we consider the following set of euclidean pairwise distances:
 \begin{align*}\mathcal{C}_{i, x} =\{\Vert p_{i, x} - d \Vert\,, d\in\mathcal{D} \}\,.\end{align*}
