@@ -94,7 +94,7 @@ This is challenging because images are high-dimensional signals and deep neural 
 % This paragraph must discuss a/ the fact that a lot of theoretical(eg arora)/empirical(eg bagnet) works are implicitely or explicitely patch based b/ They don't do the necessary ablations to see that and the low dimensional structure of patches is quite more reasonable idea
 % \mynotes{need a better flow above to not make the next sentecne repettivie}
 Our work is primarly motivated by this recent line of research, which focuses on convolutional kernels methods.  All those works  share a common processing step that constructs a similarity measure at the image patch level. We thus investigate to what extent this common step is behind the success of those methods. 
-%We thus investigate the common step amongst these works, which all rely on similarity measure at the image patch level, finding this might be implicitely the reason of  their success.
+%We thus investigate the common step amongst these works, which all rely on similarity measure at the image patch level, finding this might be implicitely the reason of  their success. 
 Without clear ablation experiments, it remains difficult to know which  engineering choices are important, between the kernel design and the patch similarity measure. 
 In our work, we decompose and analyze each step of our feature design, on gold-standard  datasets and find that a method based solely on $K$-Nearest Neighbors encoding in a dictionary of randomly selected patches is actually a strong baseline for image classification.Those findings are aligned with  empirical studies that relate deep learning models decisions with visual interpretations at small and large patch level
 \citep{zeiler2014visualizing,brendel2019approximating}.
@@ -107,7 +107,7 @@ For instance, in the context of image compression, it is known that patches can 
 
 %   We recall that patches can be modeled as locally stationary processes obtained from images, and it can be empirically verified that they are sparsified in a wavelet basis~\citep{mallat1999wavelet}. Furthermore, they are often the very first component of many classic vision pipelines \citep{perronnin2010improving,lowe2004distinctive,brendel2019approximating,oyallon2018scattering}. While the literature provides a detailed analysis of the behavior of a dictionary of patches for image compression
 % \citep{wallace1992jpeg}, texture synthesis\citep{efros1999texture} or image inpainting \citep{criminisi2004region}, we have a limited knowledge and understanding of it in the context of image classification. %We address this  issue by studying this experimentally.
-
+ 
 We investigate the effect of patch-based pre-processing for image classification through a simple baseline representation that does not involve learning  (up to a linear classifier) on both CIFAR-10 and ImageNet datasets: the path from CIFAR-10 to ImageNet had never been explored until now in this context.  Thus, we believe our baseline to be of high interest for understanding non-deep learning methods, which almost systematically rely on a patch (or descriptor of a patch) encoding step. Our work allows to understand the relative improvement of such encoding step and we show that patches solely are a challenging baseline for classification on Imagenet:  we outperform by a large margin the classification accuracy of former attempts to get rid of representation learning on the large-scale ImageNet dataset.
 
 
@@ -191,8 +191,8 @@ For a fixed dataset, this dictionary $\mathcal{D}$ is obtained by uniformly samp
 
  
 For each whitened patch we encode the $K$-Nearest Neighbors of $p_{i,x}$ from the set $\mathcal{D}$, for some $ K \in \mathbb{N}$, which is a Vector Quantization (VQ) step with hard-assignment \Edouard{CITE}.
-More formally, we consider $\tau_{i,x}$ the $K$-th smallest  element of $\mathcal{C}_{i,x}$, and we define the $K$-Nearest Neighbors binary encoding as follow, for $(d,i)\in\mathcal{D}\times\mathcal{I}$:
-
+More formally, we consider $\tau_{i,x}$ the $K$-th smallest  element of $\mathcal{C}_{i,x}$, and we define the $K$-Nearest Neighbors binary encoding as follow, for  $(d,i)\in\mathcal{D}\times\mathcal{I}$:
+   
 
 \begin{equation}
 \label{encoding}
