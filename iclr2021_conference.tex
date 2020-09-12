@@ -150,24 +150,18 @@ The Scattering Transform \citep{mallat2012group} is also a deep non-linear opera
 Some works also study directly patch encoders that achieve competitive accuracy on ImageNet but involve deep cascade of layers that are difficult to interpret \citep{oyallon2017scaling,zarka2019deep,brendel2019approximating}. Here, we focus on shallow classifiers.
 
 \section{Methods}
-
-
-
-
 \label{method}
+We first discuss in \ref{sec:data-driven_kernels} how recent methods such as NTK rely on \textbf{data-driven convolutional kernels} which we believe are responsible for the competitive performance on simple image classification tasks. We then propose a simple method in \ref{knn} to obtain an effective data-driven convolutional kernels for image classification while still being scalable.
+
+\subsection{Data-driven convolutional kernels}\label{sec:data-driven_kernels}
+%\Edouard{Linear or kernel methods rely heavily on the quality of the features which are fed to such algorithms. One observation of our work is that there is a substantial gap of performances between hand-crafted features and data-driven features. We believe our method remains simple because it does not involve any representation-learning step and thus no weight of our feature is adapted to a specific bias of the dataset. Furthermore, compared to deep method, ours is shallow.}
+A convolutional kernel $K(x,y)$ computes a similarity between two images $x$ and $y$ based on local patches of $x$ and $y$. It is said to be data-dependent if, in addition, the similarity measure depends on statistics of the data \textbf{without any supervision}. In particular, we will be interested in kernels of the form $K(x,y)=  \widetilde{K}(\Phi(x),\Phi(y))$, where $\Phi(x)$ is a data-driven representation and $\widetilde{K}$ is a convolutional kernel which might not be data-driven. In \cite{shankar2020neural}, $\widetilde{K}$ is obtained by composition of convolutional kernel operations and $\Phi(x)$ consists of a ZCA whitening of the image $x$. In \cite{coates2011analysis,recht2019imagenet}, $\Phi(x)$ is obtained by convolving the image $x$ with a dictionary of pre-processed patches extracted from the dataset. \cite{li2019enhanced} uses a similar dictionary based representation for $\Phi$ and a CNTK for $\widetilde{K}$. Finally, \cite{mairal2016end} performs a whitening for $\Phi$ and considers a convolutional kernel $\widetilde{K}$ based on extracted dictionary of patches. In \ref{experiments}, we show that using data-driven kernels improves accuracy compared to their non-data-driven counterpart. Next, we present a simple and scalable method to obtain data-driven convolutional kernel which is  shown in \ref{experiments} to be competitive on Cifar10 while still being amenable to large scale image classification on ImageNet. 
+\subsection{K-Nearest Neighbors convolutional kernel}\label{knn}
 We first introduce our main notations. A patch $p$ of size $Q^2$ of a larger image $x$, is a  restriction of that image to a squared domain of surface $Q^2$. We denote by $N^2$ the size of the natural image $x$ and require that $Q<=N$. Hence, for a spatial index $i$ of the image,  $p_{i,x}$ represents the patch of image $x$ located at $i$.
 We further introduce the collection of all overlapping patches of that image, denoted by: $\mathcal{P}_x=\{p_{i,x},i\in\mathcal{I}\}$ where $\mathcal{I}$ is a spatial index set such that $|\mathcal{I}|=(N-Q+1)
 ^2$. 
-
-\subsection{Data-driven kernels}
-\Edouard{Linear or kernel methods rely heavily on the quality of the features which are fed to such algorithms. One observation of our work is that there is a substential gap of performances between hand-crafted features and data-driven features. We believe our method remains simple because it does not involve any representation-learning step and thus no weight of our feature is adapted to a specific bias of the dataset. Furthermore, compared to deep method, ours is shallow.
-}
-
-
-\subsection{Whitening}
-
-In this section, we describe the single pre-processing step that we used on our image data, namely a whitening procedure on patches. Section \ref{experiments} shows that this step is crucial. 
-Here, we view  natural image patches of size $Q^2$ as samples from a random vector of mean $\mu$ and covariance   $\Sigma$. 
+\paragraph{Whitening} We describe the single pre-processing step that we used on our image data, namely a whitening procedure on patches. %Section \ref{experiments} shows that this step is crucial. 
+Here, we view natural image patches of size $Q^2$ as samples from a random vector of mean $\mu$ and covariance   $\Sigma$. 
 %and we further assume that $\mu = 0$ for simplicity.
 We then consider  whitening operators which act at the level of each image patch by first subtracting its mean $\mu$ then applying the linear transformation $W=(\lambda \mathbf{I}+\Sigma
 )^{-1/2}$ to the centered patch. The additional whitening regularization with parameter $\lambda$ was used to avoid ill-conditioning effects.
@@ -176,7 +170,7 @@ We then consider  whitening operators which act at the level of each image patch
 
 The whitening operation is defined up to an isometry, but the Euclidean distance between whitened patches (i.e., the Mahanobolis distance \citep{chandra1936generalised}) is not affected by the choice of such isometry (choices leading to PCA, ZCA, ...), as discussed in Appendix A.
 %In practice, we estimate the related covariance matrix via the empirical covariance matrix computed over the training set. 
-In practice,  the mean and covariance are estimated empirically from the training set to construct the whitening operators. For the sake of simplicity, we  only  consider whitened patches, and unless explicitly stated, we assume that each patch $p$ is already whitened, which holds in paticular for the collection of patches in $\matthcal{P}_x$ of any image $x$. 
+In practice,  the mean and covariance are estimated empirically from the training set to construct the whitening operators. For the sake of simplicity, we  only  consider whitened patches, and unless explicitly stated, we assume that each patch $p$ is already whitened, which holds in particular for the collection of patches in $\mathcal{P}_x$ of any image $x$. 
 Once this whitening step is performed, the Euclidean distance over patches is approximatively isotropic and is used in the next section to represent our signals.
 
 \begin{figure}[h]
@@ -188,14 +182,11 @@ Once this whitening step is performed, the Euclidean distance over patches is ap
 \label{dico}
 \end{figure}
 
-\subsection{$K$-Nearest Neighbors on patches\label{knn}}
-
+\paragraph{$K$-Nearest Neighbors on patches}
 The core idea of our algorithm is to compare the distances between each patch of an image and a fixed dictionary of patches $\mathcal{D}$, with size $|\mathcal{D}|$.
 For a fixed dataset, this dictionary $\mathcal{D}$ is obtained by uniformly sampling patches from images over the whole training set. We augment $\mathcal{D}$ into $\cup_{d\in \mathcal{D}}\{d,-d\}$ because it allows the dictionary of patches to be contrast invariant and we observe it leads to better classification accuracies; we still refer to it as $\mathcal{D}$. An illustration is given by Fig.~\ref{dico}. Once the dictionary $\mathcal{D}$ is fixed, for each patch $p_{i,x}$ we consider the set $\mathcal{C}_{i, x}$ of pairwise distances $\mathcal{C}_{i, x} =\{\Vert p_{i, x} - d \Vert\,, d\in\mathcal{D} \} $.
 For each whitened patch we encode the $K$-Nearest Neighbors of $p_{i,x}$ from the set $\mathcal{D}$, for some $ K \in \mathbb{N}$.
 More formally, we consider $\tau_{i,x}$ the $K$-th smallest  element of $\mathcal{C}_{i,x}$, and we define the $K$-Nearest Neighbors binary encoding as follow, for $(d,i)\in\mathcal{D}\times\mathcal{I}$:
-
-
 \begin{equation}
 \label{encoding}
 \phi(x)_{d,i}=
@@ -204,22 +195,15 @@ More formally, we consider $\tau_{i,x}$ the $K$-th smallest  element of $\mathca
 0,&\text{otherwise}.
 \end{cases} 
 \end{equation}
-
 Equation \ref{encoding} can be viewed as a Vector Quantization (VQ) step with hard-assignment \citep{coates2011importance}.
 The representation $\phi$ encodes the patch neighborhood in a subset of randomly selected patches and can be seen as a crude description of the topological geometry of the image patches.
 Moreover, it allows to view the distance between two images $x,y$ as a Hamming distance between the patches neighborhood encoding as:
 \[\Vert \phi(x)-\phi(y)\Vert^2 = \sum_{i,d}\mathbf{1}_{\phi(x)_{d,i} \neq \phi(y)_{d,i}}\,.\]
-
-
 In order to reduce the computational burden of our method, we perform an intermediary average-pooling step.
 Indeed, we subdivide $\mathcal{I}$ in squared overlapping regions $\mathcal{I}_j\subset\mathcal{I}$, leading to the representation $\Phi$ defined, for $d\in\mathcal{D}, j$ by:
 \begin{align}\Phi(x)_{d,j}= \sum_{i\in \mathcal{I}_j}\phi(x)_{d,i}\,.\end{align}
-
-Implementation details can be found in Appendix B. The next section describes our classification pipeline, as we feed our representation $\Phi$ to a linear classifier on challenging datasets.
+Hence, the resulting kernel is simply given by $K(x,y)= \langle \Phi(x),\Phi(y)\rangle $. Implementation details can be found in Appendix B. The next section describes our classification pipeline, as we feed our representation $\Phi$ to a linear classifier on challenging datasets.
 %Note that due to the hard-assignment in VQ, it would not be possible to learn the parameters of our dictionary via a standard differentiable method, consequently this approach fails to be analyzed directly through the scope of \cite{chizat2018global} for instance.
-
-
-
 \section{Experiments}
 \label{experiments}
 We train  shallow classifiers, i.e. linear classifier and 1-hidden layer CNN (1-CNN) on top of our representation $\Phi$ on two major  image classification datasets,  CIFAR-10 and ImageNet, which consist respectively of $5\times10^5$ small and $1.2\times10^6$ large color images  divided respectively into 10 and $10^3$ classes.
@@ -368,7 +352,6 @@ This further indicates the relevance of patches neighborhood information for cla
     \hline
   \end{tabular}
 \end{table}
-
 
 
 
